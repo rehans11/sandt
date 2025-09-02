@@ -54,9 +54,9 @@ const Dashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       const [servicesResponse, carsResponse, customersResponse] = await Promise.all([
-        axios.get('http://localhost:5001/api/services/all'),
-        axios.get('http://localhost:5001/api/cars/all'),
-        axios.get('http://localhost:5001/api/customers')
+        axios.get('http://localhost:5002/api/services/all'),
+        axios.get('http://localhost:5002/api/cars/all'),
+        axios.get('http://localhost:5002/api/customers')
       ]);
 
       setServices(servicesResponse.data);

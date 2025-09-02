@@ -39,7 +39,7 @@ const CustomerList: React.FC = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/customers');
+      const response = await axios.get('http://localhost:5002/api/customers');
       setCustomers(response.data);
     } catch (error) {
       console.error('Error fetching customers:', error);
@@ -70,7 +70,7 @@ const CustomerList: React.FC = () => {
   const handleDeleteCustomer = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this customer?')) {
       try {
-        await axios.delete(`http://localhost:5001/api/customers/${id}`);
+        await axios.delete(`http://localhost:5002/api/customers/${id}`);
         fetchCustomers();
       } catch (error) {
         console.error('Error deleting customer:', error);
@@ -84,10 +84,10 @@ const CustomerList: React.FC = () => {
     try {
       if (editingCustomer) {
         console.log('Updating customer:', editingCustomer.id);
-        await axios.put(`http://localhost:5001/api/customers/${editingCustomer.id}`, formData);
+        await axios.put(`http://localhost:5002/api/customers/${editingCustomer.id}`, formData);
       } else {
         console.log('Creating new customer');
-        await axios.post('http://localhost:5001/api/customers', formData);
+        await axios.post('http://localhost:5002/api/customers', formData);
       }
       setDialogOpen(false);
       fetchCustomers();

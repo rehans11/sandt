@@ -28,7 +28,7 @@ const AllCars: React.FC = () => {
 
   const fetchAllCars = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/cars/all');
+      const response = await axios.get('http://localhost:5002/api/cars/all');
       setCars(response.data);
     } catch (error) {
       console.error('Error fetching cars:', error);

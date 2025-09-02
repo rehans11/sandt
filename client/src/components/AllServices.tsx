@@ -30,7 +30,7 @@ const AllServices: React.FC = () => {
 
   const fetchAllServices = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/services/all');
+      const response = await axios.get('http://localhost:5002/api/services/all');
       setServices(response.data);
     } catch (error) {
       console.error('Error fetching services:', error);

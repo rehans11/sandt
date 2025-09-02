@@ -197,7 +197,7 @@ const CustomerDetail: React.FC = () => {
 
   const fetchCustomer = async () => {
     try {
-      const response = await axios.get(`http://localhost:5001/api/customers/${id}`);
+      const response = await axios.get(`http://localhost:5002/api/customers/${id}`);
       setCustomer(response.data);
     } catch (error) {
       console.error('Error fetching customer:', error);
@@ -208,7 +208,7 @@ const CustomerDetail: React.FC = () => {
 
   const fetchCars = async () => {
     try {
-      const response = await axios.get(`http://localhost:5001/api/customers/${id}/cars`);
+      const response = await axios.get(`http://localhost:5002/api/customers/${id}/cars`);
       setCars(response.data);
     } catch (error) {
       console.error('Error fetching cars:', error);
@@ -217,7 +217,7 @@ const CustomerDetail: React.FC = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get(`http://localhost:5001/api/customers/${id}/services`);
+      const response = await axios.get(`http://localhost:5002/api/customers/${id}/services`);
       setServices(response.data);
     } catch (error) {
       console.error('Error fetching services:', error);
@@ -257,7 +257,7 @@ const CustomerDetail: React.FC = () => {
   const handleDeleteCar = async (carId: string) => {
     if (window.confirm('Are you sure you want to delete this car?')) {
       try {
-        await axios.delete(`http://localhost:5001/api/cars/${carId}`);
+        await axios.delete(`http://localhost:5002/api/cars/${carId}`);
         fetchCars();
         fetchServices(); // Refresh services as they might be affected
       } catch (error) {
@@ -281,9 +281,9 @@ const CustomerDetail: React.FC = () => {
     e.preventDefault();
     try {
       if (editingCar) {
-        await axios.put(`http://localhost:5001/api/cars/${editingCar.id}`, carFormData);
+        await axios.put(`http://localhost:5002/api/cars/${editingCar.id}`, carFormData);
       } else {
-        await axios.post(`http://localhost:5001/api/customers/${id}/cars`, carFormData);
+        await axios.post(`http://localhost:5002/api/customers/${id}/cars`, carFormData);
       }
       setCarDialogOpen(false);
       fetchCars();
@@ -329,7 +329,7 @@ const CustomerDetail: React.FC = () => {
   const handleDeleteService = async (serviceId: string) => {
     if (window.confirm('Are you sure you want to delete this service?')) {
       try {
-        await axios.delete(`http://localhost:5001/api/services/${serviceId}`);
+        await axios.delete(`http://localhost:5002/api/services/${serviceId}`);
         fetchServices();
       } catch (error) {
         console.error('Error deleting service:', error);
@@ -341,9 +341,9 @@ const CustomerDetail: React.FC = () => {
     e.preventDefault();
     try {
       if (editingService) {
-        await axios.put(`http://localhost:5001/api/services/${editingService.id}`, serviceFormData);
+        await axios.put(`http://localhost:5002/api/services/${editingService.id}`, serviceFormData);
       } else {
-        await axios.post(`http://localhost:5001/api/customers/${id}/services`, serviceFormData);
+        await axios.post(`http://localhost:5002/api/customers/${id}/services`, serviceFormData);
       }
       setServiceDialogOpen(false);
       fetchServices();
