@@ -17,6 +17,7 @@ const CustomerList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -28,6 +29,13 @@ const CustomerList: React.FC = () => {
   useEffect(() => {
     fetchCustomers();
   }, []);
+
+  const filteredCustomers = customers.filter(customer =>
+    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.address.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const fetchCustomers = async () => {
     try {
@@ -106,18 +114,25 @@ const CustomerList: React.FC = () => {
     <div className="customer-list-container">
       <div className="customer-list-header">
         <h1>Customers</h1>
-        <button className="add-customer-btn" onClick={handleAddCustomer}>
-          + Add Customer
-        </button>
+        <div className="header-actions">
+          <div className="search-box">
+            <input
+              type="text"
+              placeholder="Search customers..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <button className="add-customer-btn" onClick={handleAddCustomer}>
+            + Add Customer
+          </button>
+        </div>
       </div>
       
-      {/* Debug info */}
-      <div style={{padding: '10px', background: '#f0f0f0', margin: '10px 0'}}>
-        Debug: Dialog open = {dialogOpen ? 'true' : 'false'}
-      </div>
+
 
       <div className="customers-grid">
-        {customers.map((customer) => (
+        {filteredCustomers.map((customer) => (
           <div key={customer.id} className="customer-card">
             <div className="customer-card-content">
               <div className="customer-card-header">
@@ -173,10 +188,17 @@ const CustomerList: React.FC = () => {
         ))}
       </div>
 
-      {customers.length === 0 && (
+      {filteredCustomers.length === 0 && customers.length === 0 && (
         <div className="empty-state">
           <h3>No customers found</h3>
           <p>Click "Add Customer" to get started</p>
+        </div>
+      )}
+      
+      {filteredCustomers.length === 0 && customers.length > 0 && (
+        <div className="empty-state">
+          <h3>No customers match your search</h3>
+          <p>Try adjusting your search terms</p>
         </div>
       )}
 

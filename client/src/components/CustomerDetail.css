@@ -350,6 +350,12 @@
   border-color: #1976d2;
 }
 
+.form-group select:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
 .form-group textarea {
   resize: vertical;
   min-height: 80px;

@@ -266,10 +266,54 @@ app.delete('/api/services/:id', (req, res) => {
   });
 });
 
-// Serve React app
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+// Get all services with customer and car information
+app.get('/api/services/all', (req, res) => {
+  const query = `
+    SELECT 
+      s.*,
+      c.name as customer_name,
+      CONCAT(car.year, ' ', car.make, ' ', car.model) as car_info
+    FROM services s
+    JOIN customers c ON s.customer_id = c.id
+    JOIN cars car ON s.car_id = car.id
+    ORDER BY s.created_at DESC
+  `;
+  
+  db.all(query, [], (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.json(rows);
+  });
 });
+
+// Get all cars with customer information
+app.get('/api/cars/all', (req, res) => {
+  const query = `
+    SELECT 
+      car.*,
+      c.name as customer_name
+    FROM cars car
+    JOIN customers c ON car.customer_id = c.id
+    ORDER BY car.created_at DESC
+  `;
+  
+  db.all(query, [], (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.json(rows);
+  });
+});
+
+// Serve React app (only in production)
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

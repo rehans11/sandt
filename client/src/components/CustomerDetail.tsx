@@ -3,6 +3,114 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './CustomerDetail.css';
 
+// Car make and model database
+const CAR_DATABASE = {
+  'Honda': ['Accord', 'Civic', 'CR-V', 'Pilot', 'Odyssey', 'Fit', 'HR-V', 'Passport', 'Ridgeline', 'Insight', 'Clarity'],
+  'Toyota': ['Camry', 'Corolla', 'RAV4', 'Highlander', 'Prius', 'Sienna', 'Tacoma', 'Tundra', '4Runner', 'Avalon', 'C-HR', 'Venza', 'Sequoia'],
+  'Ford': ['F-150', 'Escape', 'Explorer', 'Mustang', 'Focus', 'Fusion', 'Edge', 'Expedition', 'Ranger', 'Bronco', 'Maverick', 'Transit'],
+  'Chevrolet': ['Silverado', 'Equinox', 'Malibu', 'Traverse', 'Tahoe', 'Suburban', 'Camaro', 'Corvette', 'Cruze', 'Trax', 'Blazer', 'Colorado'],
+  'Nissan': ['Altima', 'Sentra', 'Rogue', 'Pathfinder', 'Murano', 'Maxima', 'Versa', 'Kicks', 'Armada', 'Frontier', 'Titan', '370Z', 'GT-R'],
+  'BMW': ['3 Series', '5 Series', '7 Series', 'X1', 'X3', 'X5', 'X7', 'Z4', 'i3', 'i8', '2 Series', '4 Series', '6 Series', '8 Series'],
+  'Mercedes-Benz': ['C-Class', 'E-Class', 'S-Class', 'A-Class', 'GLA', 'GLC', 'GLE', 'GLS', 'CLA', 'CLS', 'G-Class', 'AMG GT', 'Sprinter'],
+  'Audi': ['A3', 'A4', 'A6', 'A8', 'Q3', 'Q5', 'Q7', 'Q8', 'TT', 'R8', 'e-tron', 'A5', 'A7', 'RS3', 'RS4', 'RS6'],
+  'Volkswagen': ['Jetta', 'Passat', 'Golf', 'Tiguan', 'Atlas', 'Beetle', 'Arteon', 'ID.4', 'CC', 'Touareg', 'Golf R', 'GTI'],
+  'Hyundai': ['Elantra', 'Sonata', 'Tucson', 'Santa Fe', 'Palisade', 'Accent', 'Veloster', 'Kona', 'Nexo', 'Genesis', 'Ioniq'],
+  'Kia': ['Forte', 'Optima', 'Sportage', 'Sorento', 'Telluride', 'Soul', 'Stinger', 'Niro', 'Seltos', 'Carnival', 'EV6'],
+  'Mazda': ['Mazda3', 'Mazda6', 'CX-3', 'CX-5', 'CX-9', 'MX-5 Miata', 'CX-30', 'Mazda2', 'RX-7', 'RX-8'],
+  'Subaru': ['Impreza', 'Legacy', 'Outback', 'Forester', 'Ascent', 'WRX', 'BRZ', 'Crosstrek', 'Tribeca', 'Baja'],
+  'Lexus': ['ES', 'IS', 'GS', 'LS', 'RX', 'GX', 'LX', 'NX', 'UX', 'LC', 'RC', 'CT', 'SC'],
+  'Acura': ['ILX', 'TLX', 'RLX', 'RDX', 'MDX', 'NSX', 'Integra', 'Legend', 'Vigor', 'CL'],
+  'Infiniti': ['Q50', 'Q60', 'Q70', 'QX30', 'QX50', 'QX60', 'QX80', 'G37', 'M37', 'FX35', 'EX35'],
+  'Cadillac': ['ATS', 'CTS', 'XTS', 'XT4', 'XT5', 'XT6', 'Escalade', 'CT6', 'ELR', 'SRX', 'DTS'],
+  'Lincoln': ['MKZ', 'Continental', 'MKC', 'MKT', 'MKX', 'Navigator', 'Aviator', 'Corsair', 'Nautilus', 'Town Car'],
+  'Jaguar': ['XE', 'XF', 'XJ', 'F-PACE', 'E-PACE', 'I-PACE', 'F-TYPE', 'XK', 'S-TYPE', 'X-TYPE'],
+  'Land Rover': ['Range Rover', 'Range Rover Sport', 'Range Rover Evoque', 'Range Rover Velar', 'Discovery', 'Discovery Sport', 'Defender'],
+  'Porsche': ['911', 'Cayenne', 'Macan', 'Panamera', 'Taycan', 'Boxster', 'Cayman', '718', '918 Spyder'],
+  'Tesla': ['Model S', 'Model 3', 'Model X', 'Model Y', 'Roadster', 'Cybertruck', 'Semi'],
+  'Volvo': ['S60', 'S90', 'V60', 'V90', 'XC40', 'XC60', 'XC90', 'C30', 'C70', 'S40', 'V40'],
+  'Genesis': ['G70', 'G80', 'G90', 'GV70', 'GV80', 'Coupe', 'Sedan'],
+  'Alfa Romeo': ['Giulia', 'Stelvio', '4C', 'Spider', 'GTV', '156', '159', 'Brera', 'Giulietta'],
+  'Maserati': ['Ghibli', 'Quattroporte', 'Levante', 'GranTurismo', 'GranCabrio', 'MC20'],
+  'Bentley': ['Continental', 'Flying Spur', 'Bentayga', 'Mulsanne', 'Azure', 'Arnage'],
+  'Rolls-Royce': ['Phantom', 'Ghost', 'Wraith', 'Dawn', 'Cullinan', 'Silver Shadow'],
+  'Ferrari': ['488', 'F8', 'SF90', 'Roma', 'Portofino', '812', 'LaFerrari', 'California'],
+  'Lamborghini': ['Huracán', 'Aventador', 'Urus', 'Gallardo', 'Murciélago', 'Countach'],
+  'McLaren': ['720S', '570S', '600LT', 'GT', 'Senna', 'P1', '650S', '540C'],
+  'Aston Martin': ['DB11', 'Vantage', 'DBS', 'Rapide', 'Vanquish', 'DB9', 'V8 Vantage'],
+  'Bugatti': ['Chiron', 'Veyron', 'Divo', 'Centodieci', 'La Voiture Noire'],
+  'Koenigsegg': ['Regera', 'Agera', 'Jesko', 'Gemera', 'CCX', 'CCR'],
+  'Pagani': ['Huayra', 'Zonda', 'Utopia', 'Imola', 'C10'],
+  'Rimac': ['Nevera', 'Concept One', 'C_Two'],
+  'Lotus': ['Evora', 'Elise', 'Exige', 'Emira', 'Esprit', 'Elan'],
+  'Morgan': ['Plus 4', 'Plus 6', '3 Wheeler', 'Aero 8', 'Roadster'],
+  'Caterham': ['Seven', 'Seven 160', 'Seven 360', 'Seven 420', 'Seven 620'],
+  'Ariel': ['Atom', 'Nomad', 'Ace'],
+  'BAC': ['Mono', 'Mono R'],
+  'Radical': ['SR1', 'SR3', 'SR8', 'RXC'],
+  'KTM': ['X-Bow', 'X-Bow GT', 'X-Bow GT4'],
+  'Donkervoort': ['D8 GTO', 'D8 GT', 'D8 270'],
+  'Ginetta': ['G40', 'G50', 'G55', 'G60'],
+  'Noble': ['M600', 'M12', 'M400'],
+  'Ultima': ['GTR', 'Evolution', 'Can-Am'],
+  'Zenvo': ['TS1', 'ST1', 'TSR-S'],
+  'W Motors': ['Lykan HyperSport', 'Fenyr SuperSport'],
+  'Arrinera': ['Hussarya', 'Venocara'],
+  'Tramontana': ['R', 'XTR'],
+  'Gumpert': ['Apollo', 'Tornante'],
+  'Spyker': ['C8', 'C12', 'D8'],
+  'Pininfarina': ['Battista'],
+  'Automobili Pininfarina': ['Battista'],
+  'Czinger': ['21C'],
+  'Drako': ['GTE'],
+  'Hennessey': ['Venom F5', 'Venom GT'],
+  'SSC': ['Tuatara', 'Ultimate Aero'],
+  'Saleen': ['S7', 'S1', 'S5S Raptor'],
+  'Vector': ['W8', 'M12'],
+  'Rossion': ['Q1'],
+  'Panoz': ['Esperante', 'AIV Roadster'],
+  'Mosler': ['MT900', 'Raptor'],
+  'Venturi': ['Fetish', '400 GT'],
+  'Wiesmann': ['GT', 'Roadster'],
+  'Gillet': ['Vertigo'],
+  'Perana': ['Z-One'],
+  'Rezvani': ['Beast', 'Tank'],
+  'Vencer': ['Sarthe'],
+  'Arash': ['AF8', 'AF10'],
+  'Fisker': ['Karma', 'Ocean'],
+  'Lucid': ['Air', 'Gravity'],
+  'Rivian': ['R1T', 'R1S'],
+  'Polestar': ['1', '2', '3', '4', '5'],
+  'NIO': ['ES8', 'ES6', 'EC6', 'ET7', 'ET5'],
+  'XPeng': ['P7', 'G3', 'P5'],
+  'Li Auto': ['One', 'L9', 'L8', 'L7'],
+  'BYD': ['Tang', 'Song', 'Qin', 'Han', 'Dolphin', 'Seal'],
+  'Hongqi': ['H9', 'HS7', 'HS5', 'E-HS9'],
+  'Geely': ['Emgrand', 'Boyue', 'Coolray', 'Atlas'],
+  'Great Wall': ['Haval H6', 'Haval H9', 'Wey VV7', 'Ora R1'],
+  'Chery': ['Tiggo', 'Arrizo', 'Exeed'],
+  'JAC': ['iEV7S', 'iEVS4', 'Refine S7'],
+  'SAIC': ['Roewe', 'MG', 'Maxus'],
+  'Dongfeng': ['Aeolus', 'Fengon', 'Rich'],
+  'FAW': ['Hongqi', 'Besturn', 'Jiefang'],
+  'BAIC': ['BJ40', 'EU5', 'EX5'],
+  'GAC': ['Trumpchi', 'Aion', 'Haval'],
+  'Changan': ['CS75', 'CS55', 'Eado'],
+  'Haval': ['H6', 'H9', 'F7', 'H2'],
+  'Wey': ['VV7', 'VV5', 'VV6', 'P8'],
+  'Lynk & Co': ['01', '02', '03', '05', '06', '09'],
+  'Saab': ['9-3', '9-5', '9-7X', '900', '9000'],
+  'Opel': ['Astra', 'Corsa', 'Insignia', 'Mokka', 'Crossland'],
+  'Vauxhall': ['Astra', 'Corsa', 'Insignia', 'Mokka', 'Crossland'],
+  'Peugeot': ['208', '308', '508', '2008', '3008', '5008'],
+  'Citroën': ['C3', 'C4', 'C5', 'C3 Aircross', 'C5 Aircross'],
+  'Renault': ['Clio', 'Megane', 'Kadjar', 'Koleos', 'Captur'],
+  'Dacia': ['Sandero', 'Duster', 'Logan', 'Lodgy', 'Dokker'],
+  'Seat': ['Ibiza', 'Leon', 'Ateca', 'Tarraco', 'Arona'],
+  'Skoda': ['Fabia', 'Octavia', 'Superb', 'Kodiaq', 'Kamiq'],
+  'Fiat': ['500', 'Panda', 'Tipo', '500X', '500L'],
+  'Lancia': ['Ypsilon', 'Delta', 'Thema', 'Voyager']
+};
+
 interface Customer {
   id: string;
   name: string;
@@ -64,6 +172,9 @@ const CustomerDetail: React.FC = () => {
     vin: '',
     notes: '',
   });
+  
+  // Available models based on selected make
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
   
   const [serviceFormData, setServiceFormData] = useState({
     car_id: '',
@@ -138,6 +249,8 @@ const CustomerDetail: React.FC = () => {
       vin: car.vin,
       notes: car.notes,
     });
+    // Set available models for the selected make
+    setAvailableModels(CAR_DATABASE[car.make as keyof typeof CAR_DATABASE] || []);
     setCarDialogOpen(true);
   };
 
@@ -151,6 +264,17 @@ const CustomerDetail: React.FC = () => {
         console.error('Error deleting car:', error);
       }
     }
+  };
+
+  // Handle make selection and update available models
+  const handleMakeChange = (make: string) => {
+    setCarFormData({ ...carFormData, make, model: '' }); // Reset model when make changes
+    setAvailableModels(CAR_DATABASE[make as keyof typeof CAR_DATABASE] || []);
+  };
+
+  // Handle model selection
+  const handleModelChange = (model: string) => {
+    setCarFormData({ ...carFormData, model });
   };
 
   const handleCarSubmit = async (e: React.FormEvent) => {
@@ -488,23 +612,36 @@ const CustomerDetail: React.FC = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="make">Make *</label>
-                  <input
+                  <select
                     id="make"
-                    type="text"
                     required
                     value={carFormData.make}
-                    onChange={(e) => setCarFormData({ ...carFormData, make: e.target.value })}
-                  />
+                    onChange={(e) => handleMakeChange(e.target.value)}
+                  >
+                    <option value="">Select Make</option>
+                    {Object.keys(CAR_DATABASE).sort().map((make) => (
+                      <option key={make} value={make}>
+                        {make}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="form-group">
                   <label htmlFor="model">Model *</label>
-                  <input
+                  <select
                     id="model"
-                    type="text"
                     required
                     value={carFormData.model}
-                    onChange={(e) => setCarFormData({ ...carFormData, model: e.target.value })}
-                  />
+                    onChange={(e) => handleModelChange(e.target.value)}
+                    disabled={!carFormData.make}
+                  >
+                    <option value="">Select Model</option>
+                    {availableModels.map((model) => (
+                      <option key={model} value={model}>
+                        {model}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="form-row">
