@@ -3,6 +3,30 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './CustomerDetail.css';
 
+// Utility function to format date for display without timezone issues
+const formatDateForDisplay = (dateString: string) => {
+  if (!dateString) return '';
+  // Parse the date string and create a local date object
+  const [year, month, day] = dateString.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  return date.toLocaleDateString();
+};
+
+// Utility function to format date for input (YYYY-MM-DD)
+const formatDateForInput = (dateString: string) => {
+  if (!dateString) return '';
+  // If it's already in YYYY-MM-DD format, return as is
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    return dateString;
+  }
+  // Otherwise, parse and format
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 // Car make and model database
 const CAR_DATABASE = {
   'Honda': ['Accord', 'Civic', 'CR-V', 'Pilot', 'Odyssey', 'Fit', 'HR-V', 'Passport', 'Ridgeline', 'Insight', 'Clarity'],
@@ -182,7 +206,7 @@ const CustomerDetail: React.FC = () => {
     description: '',
     start_date: '',
     end_date: '',
-    stage: 'pending',
+    stage: 'planning',
     price: 0,
     notes: '',
   });
@@ -197,7 +221,7 @@ const CustomerDetail: React.FC = () => {
 
   const fetchCustomer = async () => {
     try {
-      const response = await axios.get(`http://localhost:5002/api/customers/${id}`);
+      const response = await axios.get(`http://localhost:3001/api/customers/${id}`);
       setCustomer(response.data);
     } catch (error) {
       console.error('Error fetching customer:', error);
@@ -208,7 +232,7 @@ const CustomerDetail: React.FC = () => {
 
   const fetchCars = async () => {
     try {
-      const response = await axios.get(`http://localhost:5002/api/customers/${id}/cars`);
+      const response = await axios.get(`http://localhost:3001/api/customers/${id}/cars`);
       setCars(response.data);
     } catch (error) {
       console.error('Error fetching cars:', error);
@@ -217,7 +241,7 @@ const CustomerDetail: React.FC = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get(`http://localhost:5002/api/customers/${id}/services`);
+      const response = await axios.get(`http://localhost:3001/api/customers/${id}/services`);
       setServices(response.data);
     } catch (error) {
       console.error('Error fetching services:', error);
@@ -257,7 +281,7 @@ const CustomerDetail: React.FC = () => {
   const handleDeleteCar = async (carId: string) => {
     if (window.confirm('Are you sure you want to delete this car?')) {
       try {
-        await axios.delete(`http://localhost:5002/api/cars/${carId}`);
+        await axios.delete(`http://localhost:3001/api/cars/${carId}`);
         fetchCars();
         fetchServices(); // Refresh services as they might be affected
       } catch (error) {
@@ -281,9 +305,9 @@ const CustomerDetail: React.FC = () => {
     e.preventDefault();
     try {
       if (editingCar) {
-        await axios.put(`http://localhost:5002/api/cars/${editingCar.id}`, carFormData);
+        await axios.put(`http://localhost:3001/api/cars/${editingCar.id}`, carFormData);
       } else {
-        await axios.post(`http://localhost:5002/api/customers/${id}/cars`, carFormData);
+        await axios.post(`http://localhost:3001/api/customers/${id}/cars`, carFormData);
       }
       setCarDialogOpen(false);
       fetchCars();
@@ -304,7 +328,7 @@ const CustomerDetail: React.FC = () => {
       description: '',
       start_date: '',
       end_date: '',
-      stage: 'pending',
+      stage: 'planning',
       price: 0,
       notes: '',
     });
@@ -317,8 +341,8 @@ const CustomerDetail: React.FC = () => {
       car_id: service.car_id,
       service_type: service.service_type,
       description: service.description,
-      start_date: service.start_date,
-      end_date: service.end_date,
+      start_date: formatDateForInput(service.start_date),
+      end_date: formatDateForInput(service.end_date),
       stage: service.stage,
       price: service.price,
       notes: service.notes,
@@ -329,7 +353,7 @@ const CustomerDetail: React.FC = () => {
   const handleDeleteService = async (serviceId: string) => {
     if (window.confirm('Are you sure you want to delete this service?')) {
       try {
-        await axios.delete(`http://localhost:5002/api/services/${serviceId}`);
+        await axios.delete(`http://localhost:3001/api/services/${serviceId}`);
         fetchServices();
       } catch (error) {
         console.error('Error deleting service:', error);
@@ -341,9 +365,9 @@ const CustomerDetail: React.FC = () => {
     e.preventDefault();
     try {
       if (editingService) {
-        await axios.put(`http://localhost:5002/api/services/${editingService.id}`, serviceFormData);
+        await axios.put(`http://localhost:3001/api/services/${editingService.id}`, serviceFormData);
       } else {
-        await axios.post(`http://localhost:5002/api/customers/${id}/services`, serviceFormData);
+        await axios.post(`http://localhost:3001/api/customers/${id}/services`, serviceFormData);
       }
       setServiceDialogOpen(false);
       fetchServices();
@@ -354,10 +378,11 @@ const CustomerDetail: React.FC = () => {
 
   const getStageColor = (stage: string) => {
     switch (stage) {
-      case 'pending': return '#ff9800';
+      case 'planning': return '#ff9800';
       case 'in_progress': return '#2196f3';
       case 'completed': return '#4caf50';
-      case 'cancelled': return '#f44336';
+      case 'on_hold': return '#f44336';
+      case 'cancelled': return '#9e9e9e';
       default: return '#666';
     }
   };
@@ -562,12 +587,12 @@ const CustomerDetail: React.FC = () => {
                       )}
                       <div className="info-item">
                         <span className="info-label">Start Date:</span>
-                        <span>{new Date(service.start_date).toLocaleDateString()}</span>
+                        <span>{formatDateForDisplay(service.start_date)}</span>
                       </div>
                       {service.end_date && (
                         <div className="info-item">
                           <span className="info-label">End Date:</span>
-                          <span>{new Date(service.end_date).toLocaleDateString()}</span>
+                          <span>{formatDateForDisplay(service.end_date)}</span>
                         </div>
                       )}
                       <div className="info-item">
@@ -576,7 +601,7 @@ const CustomerDetail: React.FC = () => {
                           className="stage-badge"
                           style={{ backgroundColor: getStageColor(service.stage) }}
                         >
-                          {service.stage.replace('_', ' ')}
+                          {service.stage.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                         </span>
                       </div>
                       {service.price > 0 && (
@@ -781,9 +806,10 @@ const CustomerDetail: React.FC = () => {
                     value={serviceFormData.stage}
                     onChange={(e) => setServiceFormData({ ...serviceFormData, stage: e.target.value })}
                   >
-                    <option value="pending">Pending</option>
+                    <option value="planning">Planning</option>
                     <option value="in_progress">In Progress</option>
                     <option value="completed">Completed</option>
+                    <option value="on_hold">On Hold</option>
                     <option value="cancelled">Cancelled</option>
                   </select>
                 </div>

@@ -2,6 +2,15 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AllServices.css';
 
+// Utility function to format date for display without timezone issues
+const formatDateForDisplay = (dateString: string) => {
+  if (!dateString) return '';
+  // Parse the date string and create a local date object
+  const [year, month, day] = dateString.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  return date.toLocaleDateString();
+};
+
 interface Service {
   id: string;
   customer_id: string;
@@ -30,7 +39,7 @@ const AllServices: React.FC = () => {
 
   const fetchAllServices = async () => {
     try {
-      const response = await axios.get('http://localhost:5002/api/services/all');
+      const response = await axios.get('http://localhost:3001/api/services/all');
       setServices(response.data);
     } catch (error) {
       console.error('Error fetching services:', error);
@@ -133,7 +142,7 @@ const AllServices: React.FC = () => {
                   className="stage-badge"
                   style={{ backgroundColor: getStageColor(service.stage) }}
                 >
-                  {service.stage.replace('_', ' ')}
+                  {service.stage.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                 </span>
               </div>
               <div className="service-info">
@@ -153,12 +162,12 @@ const AllServices: React.FC = () => {
                 )}
                 <div className="info-item">
                   <span className="info-label">Start Date:</span>
-                  <span>{new Date(service.start_date).toLocaleDateString()}</span>
+                  <span>{formatDateForDisplay(service.start_date)}</span>
                 </div>
                 {service.end_date && (
                   <div className="info-item">
                     <span className="info-label">End Date:</span>
-                    <span>{new Date(service.end_date).toLocaleDateString()}</span>
+                    <span>{formatDateForDisplay(service.end_date)}</span>
                   </div>
                 )}
                 {service.price > 0 && (

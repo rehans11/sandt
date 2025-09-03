@@ -3,6 +3,27 @@ import axios from 'axios';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import './Dashboard.css';
 
+// Utility function to format date for display without timezone issues
+const formatDateForDisplay = (dateString: string) => {
+  if (!dateString) return '';
+  // Parse the date string and create a local date object
+  const [year, month, day] = dateString.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  return date.toLocaleDateString();
+};
+
+// Utility function to get stage color
+const getStageColor = (stage: string) => {
+  switch (stage) {
+    case 'planning': return '#ff9800';
+    case 'in_progress': return '#2196f3';
+    case 'completed': return '#4caf50';
+    case 'on_hold': return '#f44336';
+    case 'cancelled': return '#9e9e9e';
+    default: return '#666';
+  }
+};
+
 interface Service {
   id: string;
   customer_id: string;
@@ -54,9 +75,9 @@ const Dashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       const [servicesResponse, carsResponse, customersResponse] = await Promise.all([
-        axios.get('http://localhost:5002/api/services/all'),
-        axios.get('http://localhost:5002/api/cars/all'),
-        axios.get('http://localhost:5002/api/customers')
+        axios.get('http://localhost:3001/api/services/all'),
+        axios.get('http://localhost:3001/api/cars/all'),
+        axios.get('http://localhost:3001/api/customers')
       ]);
 
       setServices(servicesResponse.data);
@@ -70,17 +91,23 @@ const Dashboard: React.FC = () => {
       weekFromNow.setDate(weekFromNow.getDate() + 7);
 
       const servicesToday = servicesResponse.data.filter((service: Service) => {
-        const endDate = new Date(service.end_date);
+        if (!service.end_date) return false;
+        const [year, month, day] = service.end_date.split('-').map(Number);
+        const endDate = new Date(year, month - 1, day);
         return endDate.toDateString() === today.toDateString();
       });
 
       const servicesTomorrow = servicesResponse.data.filter((service: Service) => {
-        const endDate = new Date(service.end_date);
+        if (!service.end_date) return false;
+        const [year, month, day] = service.end_date.split('-').map(Number);
+        const endDate = new Date(year, month - 1, day);
         return endDate.toDateString() === tomorrow.toDateString();
       });
 
       const servicesThisWeek = servicesResponse.data.filter((service: Service) => {
-        const endDate = new Date(service.end_date);
+        if (!service.end_date) return false;
+        const [year, month, day] = service.end_date.split('-').map(Number);
+        const endDate = new Date(year, month - 1, day);
         return endDate >= today && endDate <= weekFromNow;
       });
 
@@ -248,8 +275,14 @@ const Dashboard: React.FC = () => {
                         <td>{service.car_info}</td>
                         <td>{service.service_type}</td>
                         <td>
-                          <span className={`stage-badge stage-${service.stage.toLowerCase()}`}>
-                            {service.stage}
+                          <span 
+                            className="stage-badge"
+                            style={{ 
+                              backgroundColor: getStageColor(service.stage),
+                              color: '#000000'
+                            }}
+                          >
+                            {service.stage.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                           </span>
                         </td>
                         <td>{formatDate(service.end_date)}</td>
@@ -287,8 +320,14 @@ const Dashboard: React.FC = () => {
                         <td>{service.car_info}</td>
                         <td>{service.service_type}</td>
                         <td>
-                          <span className={`stage-badge stage-${service.stage.toLowerCase()}`}>
-                            {service.stage}
+                          <span 
+                            className="stage-badge"
+                            style={{ 
+                              backgroundColor: getStageColor(service.stage),
+                              color: '#000000'
+                            }}
+                          >
+                            {service.stage.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                           </span>
                         </td>
                         <td>{formatDate(service.end_date)}</td>

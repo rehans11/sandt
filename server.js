@@ -6,7 +6,7 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors());
@@ -61,14 +61,23 @@ function initializeDatabase() {
     description TEXT,
     start_date DATE,
     end_date DATE,
-    stage TEXT NOT NULL DEFAULT 'pending',
+    stage TEXT NOT NULL DEFAULT 'planning',
     price DECIMAL(10,2),
     notes TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE CASCADE,
     FOREIGN KEY (car_id) REFERENCES cars (id) ON DELETE CASCADE
-  )`);
+  )`, () => {
+    // Migrate existing 'pending' stages to 'planning'
+    db.run(`UPDATE services SET stage = 'planning' WHERE stage = 'pending'`, (err) => {
+      if (err) {
+        console.error('Error migrating pending stages:', err.message);
+      } else {
+        console.log('Migrated pending stages to planning');
+      }
+    });
+  });
 }
 
 // API Routes
