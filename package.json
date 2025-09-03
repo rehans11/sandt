@@ -5,13 +5,18 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "start:supabase": "node server-supabase.js",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "dev:supabase": "concurrently \"npm run server:supabase\" \"npm run client\"",
     "server": "nodemon server.js",
+    "server:supabase": "nodemon server-supabase.js",
     "client": "cd client && npm start",
     "build": "cd client && npm run build",
-    "install-client": "cd client && npm install"
+    "install-client": "cd client && npm install",
+    "migrate": "node migrate-to-supabase.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.57.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "express": "^4.18.2",
